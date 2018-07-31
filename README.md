@@ -1,11 +1,11 @@
-# SipSimple client-example
+# SIP SIMPLE client example
 
-This is a small example of establishing a VoIP call with SIP in Python. It correct some errors of the [official example](http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide).
+This is a small example of establishing a VoIP call with SIP in Python. It correct some errors of the [official SIP SIMPLE library example](http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide).
 
 ### Install dependencies
 http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide
 
-### Example
+### Running
 
 ```sh
 python sample.py
