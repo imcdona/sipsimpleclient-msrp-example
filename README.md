@@ -1,14 +1,12 @@
-# sipsimpleclient-example
+# SipSimple client-example
 
-This application allows you to make calls using VOIP. The tesques I made were on the server. So I did not test with respect to sending audio. (But the recording worked sip-audio-session.)
+This is a small example of establishing a VoIP call with SIP in Python. It correct some errors of the [official example](http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide).
 
 ### Install dependencies
 http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide
 
 ### Example
 
-*Corrects some errors of the official example*
-
+```sh
 python sample.py
-
-
+```
