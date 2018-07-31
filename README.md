@@ -5,6 +5,12 @@ This is a small example of establishing a VoIP call with SIP in Python. It corre
 ### Install dependencies
 http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide
 
+### Configure
+
+ - Change file config/config entering your account credentials and SIP proxy
+ - Change constant `CALLER_ACCOUNT` in sample.py to match the account in config/config
+ - Change constant `TARGET_URI` in sample.py to contain callee's SIP URI
+
 ### Running
 
 ```sh
