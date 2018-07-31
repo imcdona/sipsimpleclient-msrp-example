@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 
 from application.notification import NotificationCenter
 from sipsimple.account import AccountManager
@@ -11,6 +11,9 @@ from sipsimple.streams import MediaStreamRegistry
 from sipsimple.threading.green import run_in_green_thread
 from threading import Event
 
+CALLER_ACCOUNT  = 'andriy.makukha@sip2sip.info'             # must be configured in config/config
+TARGET_URI      = 'sip:________@sip.linphone.org'           # SIP URI we want to call
+
 class SimpleCallApplication(SIPApplication):
 
     def __init__(self):
@@ -22,48 +25,66 @@ class SimpleCallApplication(SIPApplication):
         notification_center.add_observer(self)
 
     def call(self, callee):
+        print 'Placing call to', callee
         self.callee = callee
         self.start(FileStorage('config'))
 
     @run_in_green_thread
     def _NH_SIPApplicationDidStart(self, notification):
+        print 'Callback: application started'
         self.callee = ToHeader(SIPURI.parse(self.callee))
-        account = AccountManager().get_account("ricardo.rufino@XXX.com.br");
+        # Retrieve account from config
         try:
-            uri = SIPURI(host=account.sip.outbound_proxy.host, port=account.sip.outbound_proxy.port, parameters={'transport': account.sip.outbound_proxy.transport})
-            routes = DNSLookup().lookup_sip_proxy(uri, ['udp']).wait()
+            account = AccountManager().get_account(CALLER_ACCOUNT)
+            host = account.sip.outbound_proxy.host
+            port = account.sip.outbound_proxy.port
+            transport = account.sip.outbound_proxy.transport
+            print '      Host = %s\n      Port = %s\n Transport = %s' % (host, port, transport)
+        except Exception, e:
+            print 'ERROR:', e
+        try:
+            uri = SIPURI(host=host, port=port, parameters={'transport': transport})
+            routes = DNSLookup().lookup_sip_proxy(uri, ['tcp', 'udp']).wait()
         except DNSLookupError, e:
-            print 'DNS lookup failed: %s' % str(e)
+            print 'ERROR: DNS lookup failed:', e
         else:
-            
             self.session = Session(account)
-	    print 'Routes: %s' % str(routes)	
+            print 'Routes:', routes
             self.session.connect(self.callee, routes, streams=[MediaStreamRegistry.AudioStream()])
 
     def _NH_SIPSessionGotRingIndication(self, notification):
-        print 'Ringing!'
+        print 'Callback: ringing'
 
     def _NH_SIPSessionDidStart(self, notification):
-        audio_stream = notification.data.streams[0]
-        print 'Audio session established using "%s" codec at %sHz' % (audio_stream.codec, audio_stream.sample_rate)
+        print 'Callback: session started'
+        try:
+            audio_stream = notification.data.streams[0]
+            print 'Audio session established using "%s" codec at %sHz' % (audio_stream.codec, audio_stream.sample_rate)
+        except:
+            print notification
 
     def _NH_SIPSessionDidFail(self, notification):
-        print 'Failed to connect'
+        print 'Callback: failed to connect'
+        try:
+            print notification.data.code, notification.data.reason
+        except:
+            print notification
         self.stop()
 
     def _NH_SIPSessionDidEnd(self, notification):
-        print 'Session ended'
+        print 'Callback: session ended'
         self.stop()
 
     def _NH_SIPApplicationDidEnd(self, notification):
+        print 'Callback: application ended'
         self.ended.set()
 
-# place an audio call to the specified SIP URI in user@domain format
-# target_uri="sip:fillipe.patriota@XXX.com.br" 
-target_uri="sip:target@XXX.com.br" 
+# place an audio call to the specified SIP URI
 application = SimpleCallApplication()
-application.call(target_uri)
-print "Placing call to %s, press Enter to quit the program" % target_uri
-raw_input()
-application.session.end()
-application.ended.wait()
+application.call(TARGET_URI)
+raw_input('Press Enter to exit\n\n')
+try:
+    application.session.end()
+    application.ended.wait()
+except Exception, e:
+    print 'ERROR:', e
