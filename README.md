@@ -13,6 +13,12 @@ http://sipsimpleclient.org/projects/sipsimpleclient/wiki/SipDeveloperGuide
 
 ### Running
 
+Voice call
 ```sh
 python sample.py
+```
+
+MSRP Chat Session
+```sh
+python3 msrp-chat.py
 ```
